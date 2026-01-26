@@ -6,28 +6,28 @@ import (
 )
 
 type Bin struct {
-	id        string
-	private   bool
-	createdAt time.Time
-	name      string
+	Id        string
+	Private   bool
+	CreatedAt time.Time
+	Name      string
 }
 
 func newBin(id, name string, private bool, createdAt time.Time) (*Bin, error) {
 	return &Bin{
-		id:        id,
-		private:   private,
-		createdAt: createdAt,
-		name:      name,
+		Id:        id,
+		Private:   private,
+		CreatedAt: createdAt,
+		Name:      name,
 	}, nil
 }
 
 func main() {
 	var BinList []Bin
 	BinList = append(BinList, Bin{
-		id:        "1",
-		private:   true,
-		createdAt: time.Now(),
-		name:      "hi",
+		Id:        "1",
+		Private:   true,
+		CreatedAt: time.Now(),
+		Name:      "hi",
 	})
 	fmt.Println(BinList)
 	res, err := newBin("2", "bye", false, time.Now())
