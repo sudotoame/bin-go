@@ -1,7 +1,10 @@
 // Package bins for bin struct
 package bins
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Bin struct {
 	ID        string
@@ -10,11 +13,18 @@ type Bin struct {
 	Name      string
 }
 
-func NewBin(id, name string, private bool, createdAt time.Time) (*Bin, error) {
-	return &Bin{
+func NewBin(id, name string, private bool) (*Bin, error) {
+	if id == "" {
+		return nil, fmt.Errorf("Invalid ID")
+	}
+	if name == "" {
+		return nil, fmt.Errorf("Invalid name")
+	}
+	newBin := &Bin{
 		ID:        id,
 		Private:   private,
-		CreatedAt: createdAt,
+		CreatedAt: time.Now(),
 		Name:      name,
-	}, nil
+	}
+	return newBin, nil
 }
