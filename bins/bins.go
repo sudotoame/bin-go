@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Структура самой базы данных
 type Bin struct {
 	ID        string
 	Private   bool
@@ -13,6 +14,7 @@ type Bin struct {
 	Name      string
 }
 
+// Создание одной базы данных
 func NewBin(id, name string, private bool) (*Bin, error) {
 	if id == "" {
 		return nil, fmt.Errorf("Invalid ID")

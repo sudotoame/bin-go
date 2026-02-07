@@ -1,33 +1,29 @@
 package main
 
 import (
+	"fmt"
+
 	"dz/bingo/bins"
 	"dz/bingo/files"
 	"dz/bingo/storage"
-	"fmt"
 )
 
 const fileName = "data.json"
 
 func main() {
-	newVault := storage.NewVault(fileName)
+	newVault := storage.NewVault(files.NewJSONDB(fileName))
 
 	createBin(newVault)
-
 	fmt.Println(newVault.Bins)
-	data, err := newVault.ToByte()
-	err = files.WriteFile(data, fileName)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+
 }
 
-func createBin(vault *storage.Vault) {
+// Создание базы данных
+func createBin(vault *storage.VaultWithDB) {
 	privateCheck := false
-	id := promtData("Введите ID")
-	name := promtData("Введите name")
-	private := promtData("Сделать приватной?(false default or press Y for true)")
+	id := promtData([]string{"Введите ID"})
+	name := promtData([]string{"Введите name"})
+	private := promtData([]string{"Сделать приватной?(false default or press Y for true)"})
 	if private == "Y" || private == "y" {
 		privateCheck = true
 	}
@@ -39,9 +35,18 @@ func createBin(vault *storage.Vault) {
 	vault.AddBin(*nBin)
 }
 
-func promtData(message string) string {
+func promtData[T any](message []T) string {
+	for i, v := range message {
+		if i == len(message)-1 {
+			fmt.Print(v, " :")
+		} else {
+			fmt.Println(v)
+		}
+	}
 	var ch string
-	fmt.Print(message + ": ")
-	fmt.Scan(&ch)
+	if _, err := fmt.Scanln(&ch); err != nil {
+		fmt.Println(err)
+		return ""
+	}
 	return ch
 }
