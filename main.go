@@ -3,14 +3,22 @@ package main
 import (
 	"fmt"
 
+	"dz/bingo/api"
 	"dz/bingo/bins"
 	"dz/bingo/files"
 	"dz/bingo/storage"
+
+	"github.com/joho/godotenv"
 )
 
 const fileName = "data.json"
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println(".env load error")
+	}
+	api.NewApi()
 	newVault := storage.NewVault(files.NewJSONDB(fileName))
 
 	createBin(newVault)

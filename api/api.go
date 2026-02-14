@@ -1,4 +1,12 @@
 // Package api for work with json.bin
 package api
 
-// api json.bin
+import (
+	"dz/bingo/config"
+	"fmt"
+)
+
+func NewApi() {
+	key := config.NewConfig()
+	fmt.Println(key)
+}
