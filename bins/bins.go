@@ -3,19 +3,18 @@ package bins
 
 import (
 	"fmt"
-	"time"
 )
 
 // Структура самой базы данных
 type Bin struct {
-	ID        string
-	Private   bool
-	CreatedAt time.Time
-	Name      string
+	ID        string `json:"id"`
+	CreatedAt string `json:"createdAt"`
+	Private   bool   `json:"private"`
+	Name      string `json:"name"`
 }
 
 // Создание одной базы данных
-func NewBin(id, name string, private bool) (*Bin, error) {
+func NewBin(id, name, time string, private bool) (*Bin, error) {
 	if id == "" {
 		return nil, fmt.Errorf("Invalid ID")
 	}
@@ -25,7 +24,7 @@ func NewBin(id, name string, private bool) (*Bin, error) {
 	newBin := &Bin{
 		ID:        id,
 		Private:   private,
-		CreatedAt: time.Now(),
+		CreatedAt: time,
 		Name:      name,
 	}
 	return newBin, nil

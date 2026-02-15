@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	"dz/bingo/api"
-	"dz/bingo/bins"
 	"dz/bingo/files"
 	"dz/bingo/storage"
 
 	"github.com/joho/godotenv"
 )
 
+const collectionFile = "bins.json"
 const fileName = "data.json"
 
 func main() {
@@ -18,29 +18,33 @@ func main() {
 	if err != nil {
 		fmt.Println(".env load error")
 	}
-	api.NewApi()
-	newVault := storage.NewVault(files.NewJSONDB(fileName))
-
+	newVault := storage.NewVault(files.NewJSONDB(collectionFile))
 	createBin(newVault)
-	fmt.Println(newVault.Bins)
+	// fmt.Println(newVault.Bins)
 
 }
 
 // Создание базы данных
 func createBin(vault *storage.VaultWithDB) {
 	privateCheck := false
-	id := promtData([]string{"Введите ID"})
 	name := promtData([]string{"Введите name"})
 	private := promtData([]string{"Сделать приватной?(false default or press Y for true)"})
 	if private == "Y" || private == "y" {
 		privateCheck = true
 	}
-	nBin, err := bins.NewBin(id, name, privateCheck)
+	var privateData string
+	if privateCheck == true {
+		privateData = "true"
+	} else {
+		privateData = "false"
+	}
+	data, err := api.JsonBinPost(fileName, name, privateData)
+	// nBin, err := bins.NewBin(name, privateCheck)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	vault.AddBin(*nBin)
+	vault.AddBin(data.Metadata)
 }
 
 func promtData[T any](message []T) string {

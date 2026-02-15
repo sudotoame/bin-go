@@ -16,8 +16,8 @@ type DB interface {
 
 // Слайс баз данных Bin
 type Vault struct {
-	Bins      []bins.Bin
-	UpdatedAt time.Time
+	Bins      []bins.Bin `json:"bins"`
+	UpdatedAt time.Time  `json:"UpdatedAt"`
 }
 
 // Добавление зависимости
