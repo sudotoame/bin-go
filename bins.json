@@ -1,0 +1,17 @@
+{
+    "bins": [
+        {
+            "id": "6991b62f43b1c97be980b736",
+            "createdAt": "2026-02-15T12:03:59.022Z",
+            "private": false,
+            "name": "ansible"
+        },
+        {
+            "id": "6991b647ae596e708f2c85d0",
+            "createdAt": "2026-02-15T12:04:23.599Z",
+            "private": true,
+            "name": "vagrant"
+        }
+    ],
+    "UpdatedAt": "2026-02-15T21:04:23.807478186+09:00"
+}

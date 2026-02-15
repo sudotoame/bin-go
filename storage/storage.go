@@ -64,6 +64,7 @@ func NewVault(DB DB) *VaultWithDB {
 				Bins:      []bins.Bin{},
 				UpdatedAt: time.Now(),
 			},
+			Db: DB,
 		}
 	}
 	var vault Vault
@@ -74,6 +75,7 @@ func NewVault(DB DB) *VaultWithDB {
 				Bins:      []bins.Bin{},
 				UpdatedAt: time.Now(),
 			},
+			Db: DB,
 		}
 	}
 	return &VaultWithDB{
