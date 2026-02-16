@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"dz/bingo/api"
@@ -11,23 +12,36 @@ import (
 )
 
 const collectionFile = "bins.json"
-const fileName = "data.json"
 
+// TODO: Добавить флаги
+// TODO: Добавить другие методы
+// TODO: Добавить локального чтения айдишников и имен бинов
 func main() {
+	fileName := flag.String("file", "", "Название файла для создания бина")
+	binName := flag.String("name", "", "Название бина")
+	create := flag.Bool("create", false, "Создает бин если есть")
+	help := flag.Bool("help", false, "Показывает какие флаги есть")
+	flag.Parse()
+
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println(".env load error")
 	}
 	newVault := storage.NewVault(files.NewJSONDB(collectionFile))
-	createBin(newVault)
-	// fmt.Println(newVault.Bins)
-
+	if *create {
+		createBin(newVault, *binName, *fileName)
+		return
+	}
+	if *help {
+		fmt.Println("флаг --create имеет два зависимых флага --file=filename файл который отправляем в jsonbin и --name==binname название бина")
+		return
+	}
+	fmt.Println("Запущено без флагов: --help для помощи")
 }
 
 // Создание базы данных
-func createBin(vault *storage.VaultWithDB) {
+func createBin(vault *storage.VaultWithDB, name string, fileName string) {
 	privateCheck := false
-	name := promtData([]string{"Введите name"})
 	private := promtData([]string{"Сделать приватной?(false default or press Y for true)"})
 	if private == "Y" || private == "y" {
 		privateCheck = true
