@@ -4,12 +4,11 @@ package api
 import (
 	"bytes"
 	"dz/bingo/bins"
-	"dz/bingo/config"
-	"dz/bingo/files"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 type JsonBinResponse struct {
@@ -17,34 +16,45 @@ type JsonBinResponse struct {
 	Metadata bins.Bin `json:"metadata"`
 }
 
+type Client struct {
+	MasterKey string
+	HTTP      *http.Client
+}
+
+func NewClient(masterKey string) *Client {
+	return &Client{
+		MasterKey: masterKey,
+		HTTP: &http.Client{
+			Timeout: 15 * time.Second,
+		},
+	}
+}
+
 const urlPost = "https://api.jsonbin.io/v3/b"
 
-func JsonBinPost(filename string, binName string, private string) (*JsonBinResponse, error) {
-	key := config.NewConfig()
-	newJson := files.NewJSONDB(filename)
-	myData, err := newJson.ReadFile()
-	if err != nil {
-		return nil, fmt.Errorf("Ошибка чтения файла: %v", err)
-	}
+func (c *Client) JsonBinPost(myData []byte, binName string, private bool) (*JsonBinResponse, error) {
 	req, err := http.NewRequest("POST", urlPost, bytes.NewBuffer(myData))
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка создания метода POST: %v", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Master-Key", key.Key) // Обязательно замените на реальный ключ
+	req.Header.Set("X-Master-Key", c.MasterKey) // Обязательно замените на реальный ключ
 	// Опционально: можно задать имя бина
 	req.Header.Set("X-Bin-Name", binName)
-	req.Header.Set("X-Bin-Private", private)
+	if private {
+		req.Header.Set("X-Bin-Private", "true")
+	} else {
+		req.Header.Set("X-Bin-Private", "false")
+	}
 	// Если нужно поместить бин в коллекцию, укажите X-Collection-Id
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := c.HTTP.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка выполнения метода POST: %v", err)
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(req.Body)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("Сервер вернул ошибку: %d, тело: %s", resp.StatusCode, body)
 	}
 	body, err := io.ReadAll(resp.Body)

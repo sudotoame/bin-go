@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"dz/bingo/api"
+	"dz/bingo/config"
 	"dz/bingo/files"
 	"dz/bingo/storage"
 
@@ -13,66 +15,57 @@ import (
 
 const collectionFile = "bins.json"
 
-// TODO: Добавить флаги
 // TODO: Добавить другие методы
-// TODO: Добавить локального чтения айдишников и имен бинов
+// TODO: Добавить локальное чтения бинов по айдишнику и вывод имен бинов
 func main() {
-	fileName := flag.String("file", "", "Название файла для создания бина")
-	binName := flag.String("name", "", "Название бина")
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Использование:\n")
+		fmt.Fprintf(os.Stderr, "  %s --create --file=data.json --name=my-bin [--private]\n\n", os.Args[0])
+		fmt.Fprintln(os.Stderr, "Флаги:")
+		flag.PrintDefaults()
+	}
 	create := flag.Bool("create", false, "Создает бин если есть")
-	help := flag.Bool("help", false, "Показывает какие флаги есть")
+	fileName := flag.String("file", "", "Название файла для создания бина")
+	binName := flag.String("name", "noname", "Название бина")
+	private := flag.Bool("private", false, "Сделать бин приватным")
 	flag.Parse()
 
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println(".env load error")
+		os.Exit(1)
 	}
+	key := config.NewConfig()
+	if err = key.Validate(); err != nil {
+		fmt.Println("Ошибка конфигурации: ", err)
+		os.Exit(1)
+	}
+	apiNew := api.NewClient(key.Key)
 	newVault := storage.NewVault(files.NewJSONDB(collectionFile))
 	if *create {
-		createBin(newVault, *binName, *fileName)
+		if *fileName == "" {
+			fmt.Println("Файл должен быть задан")
+			flag.Usage()
+			os.Exit(2)
+		}
+		newJson := files.NewJSONDB(*fileName)
+		myData, err := newJson.ReadFile()
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(2)
+		}
+		createBin(newVault, *binName, myData, *apiNew, *private)
 		return
 	}
-	if *help {
-		fmt.Println("флаг --create имеет два зависимых флага --file=filename файл который отправляем в jsonbin и --name==binname название бина")
-		return
-	}
-	fmt.Println("Запущено без флагов: --help для помощи")
 }
 
 // Создание базы данных
-func createBin(vault *storage.VaultWithDB, name string, fileName string) {
-	privateCheck := false
-	private := promtData([]string{"Сделать приватной?(false default or press Y for true)"})
-	if private == "Y" || private == "y" {
-		privateCheck = true
-	}
-	var privateData string
-	if privateCheck == true {
-		privateData = "true"
-	} else {
-		privateData = "false"
-	}
-	data, err := api.JsonBinPost(fileName, name, privateData)
+func createBin(vault *storage.VaultWithDB, binName string, myData []byte, newApi api.Client, privateData bool) {
+	data, err := newApi.JsonBinPost(myData, binName, privateData)
 	// nBin, err := bins.NewBin(name, privateCheck)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	vault.AddBin(data.Metadata)
-}
-
-func promtData[T any](message []T) string {
-	for i, v := range message {
-		if i == len(message)-1 {
-			fmt.Print(v, " :")
-		} else {
-			fmt.Println(v)
-		}
-	}
-	var ch string
-	if _, err := fmt.Scanln(&ch); err != nil {
-		fmt.Println(err)
-		return ""
-	}
-	return ch
 }

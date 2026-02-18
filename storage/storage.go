@@ -45,6 +45,10 @@ func (vault *VaultWithDB) save() {
 		return
 	}
 	err = vault.Db.WriteFile(data)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 // Добавляет новые элементы в Vault, добавляя новые записи в файл
