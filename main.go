@@ -25,6 +25,7 @@ func main() {
 	id := flag.String("id", "", "Айди бина")
 	list := flag.Bool("list", false, "Прочитать локально сохраненные бины")
 	update := flag.Bool("update", false, "Обновить бин по айдишнику")
+	delete := flag.Bool("delete", false, "Удаляет бин по айди")
 	private := flag.Bool("private", false, "Сделать бин приватным (Только для создания)")
 	flag.Parse()
 
@@ -60,6 +61,10 @@ func main() {
 		putBin(*fileName, *id, *apiNew)
 		return
 	}
+	if *delete {
+		deleteBin(*fileName, *id, *apiNew, *newVault)
+		return
+	}
 	flag.Usage()
 }
 
@@ -68,6 +73,7 @@ func flagUsageInit() {
 		fmt.Fprintf(os.Stderr, "Использование:\n")
 		fmt.Fprintf(os.Stderr, "  %s --create --file=data.json --name=my-bin [--private]\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "  %s --get --id=binid\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s --delete --id=binid\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "  %s --update --file=data.json --id=binid\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "  %s --list\n\n", os.Args[0])
 		fmt.Fprintln(os.Stderr, "Флаги:")
@@ -136,4 +142,21 @@ func putBin(fileName string, id string, newApi api.Client) {
 		return
 	}
 	fmt.Println(string(updData.Record))
+}
+
+func deleteBin(fileName string, id string, newApi api.Client, vaultBin storage.VaultWithDB) {
+	if id == "" {
+		fmt.Println("Айди не может быть пустым")
+		flag.Usage()
+		os.Exit(2)
+	}
+	if err := newApi.DeleteBin(id); err != nil {
+		fmt.Println(err)
+		return
+	}
+	if err := vaultBin.DeleteBin(id); !err {
+		fmt.Println("Локальный бин не удален")
+		return
+	}
+	fmt.Printf("Бин %s удален\n", id)
 }
