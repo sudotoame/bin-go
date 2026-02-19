@@ -92,7 +92,7 @@ func getBin(id string, newApi api.Client) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(data.Record)
+	fmt.Println(string(data.Record))
 }
 
 func createBin(vault *storage.VaultWithDB, fileName string, binName string, newApi api.Client, privateData bool) {
