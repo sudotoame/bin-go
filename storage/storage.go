@@ -5,7 +5,6 @@ import (
 	"dz/bingo/bins"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -91,7 +90,7 @@ func NewVault(DB DB) *VaultWithDB {
 
 func (vault *VaultWithDB) DeleteBin(id string) bool {
 	for i, v := range vault.Bins {
-		if strings.Contains(v.ID, id) {
+		if id == v.ID {
 			vault.Bins = append(vault.Bins[:i], vault.Bins[i+1:]...)
 			vault.save()
 			return true
