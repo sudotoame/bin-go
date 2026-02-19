@@ -62,7 +62,7 @@ func main() {
 		return
 	}
 	if *delete {
-		deleteBin(*fileName, *id, *apiNew, *newVault)
+		deleteBin(*id, *apiNew, *newVault)
 		return
 	}
 	flag.Usage()
@@ -125,6 +125,11 @@ func listBin(vault storage.VaultWithDB) {
 }
 
 func putBin(fileName string, id string, newApi api.Client) {
+	if fileName == "" {
+		fmt.Println("Файл должен быть задан")
+		flag.Usage()
+		os.Exit(2)
+	}
 	if id == "" {
 		fmt.Println("Айди не может быть пустым")
 		flag.Usage()
@@ -144,7 +149,7 @@ func putBin(fileName string, id string, newApi api.Client) {
 	fmt.Println(string(updData.Record))
 }
 
-func deleteBin(fileName string, id string, newApi api.Client, vaultBin storage.VaultWithDB) {
+func deleteBin(id string, newApi api.Client, vaultBin storage.VaultWithDB) {
 	if id == "" {
 		fmt.Println("Айди не может быть пустым")
 		flag.Usage()

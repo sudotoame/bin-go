@@ -43,6 +43,7 @@ func (c *Client) DeleteBin(id string) error {
 	if err != nil {
 		return fmt.Errorf("Ошибка выполнения метода DELETE: %w", err)
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("Сервер вернул ошибку: %d, тело: %s", resp.StatusCode, body)
@@ -88,7 +89,6 @@ func (c *Client) PostBin(myData []byte, binName string, private bool) (*JsonBinR
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка чтения ответа метода POST: %w", err)
 	}
-
 	var response JsonBinResponse
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, fmt.Errorf("Ошибка парсинга JSON: %w", err)
@@ -105,7 +105,7 @@ func (c *Client) GetBin(id string) (*JsonBinResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка создания метода GET: %w", err)
 	}
-	req.Header.Set("X-master-key", c.MasterKey)
+	req.Header.Set("X-Master-key", c.MasterKey)
 	res, err := c.HTTP.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка выполнения GET: %w", err)
@@ -115,6 +115,7 @@ func (c *Client) GetBin(id string) (*JsonBinResponse, error) {
 		body, _ := io.ReadAll(res.Body)
 		return nil, fmt.Errorf("Сервер вернул ошибку: %d, тело: %s", res.StatusCode, body)
 	}
+	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка чтения ответа GET: %w", err)
@@ -138,10 +139,11 @@ func (c *Client) UpdateBin(data []byte, id string) (*JsonBinResponse, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка создания метода PUT: %w", err)
 	}
-	if resp.StatusCode > 200 || resp.StatusCode >= 300 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("Сервер вернул ошибку: %d, тело: %s", resp.StatusCode, body)
 	}
+	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка чтения ответа (PUT): %w", err)

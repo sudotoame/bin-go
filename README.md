@@ -1,8 +1,90 @@
-#bin go
+# bin-go
 
-- `go run main.go --create --file="data.json" --name=my-bin` - Создает `bin` в JsonBin из `data.json`
-    - `--name` - по дефолту "noname", можно не задавать
-- `go run main.go --update --file="data.json" --id=binid` - Обновляет `bin` в JsonBin из локального `data.json` 
-- `go run main.go --delete --id=binid` - Удаляет бин по айдишнику
-- `go run main.go --get --id=binid` - Выводит бин по айдишнику
-- `go run main.go --list` 
+CLI-утилита для работы с [JSONBin.io](https://jsonbin.io) — создание, обновление, удаление и получение JSON-бинов, а также локальное хранение метаданных.
+
+## Требования
+
+- Go 1.25+
+- Аккаунт на [jsonbin.io](https://jsonbin.io)
+- Master Key из личного кабинета JSONBin
+
+## Установка
+
+```bash
+git clone <repository-url>
+cd bin-go
+go build -o bin-go .
+```
+
+## Конфигурация
+
+Создайте файл `.env` в корне проекта:
+
+```env
+KEY=ваш_master_key_от_jsonbin
+```
+
+## Использование
+
+### Создать бин
+
+Создаёт новый бин в JSONBin из локального JSON-файла и сохраняет метаданные в `bins.json`:
+
+```bash
+go run main.go --create --file=data.json --name=my-bin
+```
+
+| Флаг     | Описание                    | По умолчанию |
+|----------|-----------------------------|--------------|
+| `--file` | Путь к JSON-файлу           | обязателен   |
+| `--name` | Имя бина                    | `noname`     |
+| `--private` | Сделать бин приватным   | `false`      |
+
+### Получить бин
+
+Выводит содержимое бина по ID:
+
+```bash
+go run main.go --get --id=<bin-id>
+```
+
+### Обновить бин
+
+Обновляет существующий бин данными из локального файла:
+
+```bash
+go run main.go --update --file=data.json --id=<bin-id>
+```
+
+### Удалить бин
+
+Удаляет бин на JSONBin и в локальном хранилище:
+
+```bash
+go run main.go --delete --id=<bin-id>
+```
+
+### Список локальных бинов
+
+Выводит содержимое локального файла `bins.json` с метаданными сохранённых бинов:
+
+```bash
+go run main.go --list
+```
+
+## Структура проекта
+
+```
+bin-go/
+├── main.go       # Точка входа, парсинг флагов
+├── api/          # Клиент API JSONBin.io
+├── bins/         # Модель бина (метаданные)
+├── config/       # Загрузка конфигурации (.env)
+├── files/        # Чтение/запись JSON-файлов
+├── storage/      # Локальное хранилище (bins.json)
+└── go.mod
+```
+
+## Локальное хранилище
+
+Метаданные созданных бинов сохраняются в файл `bins.json` в корне проекта. Файл автоматически создаётся при первом `--create`.
