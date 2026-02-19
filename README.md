@@ -31,7 +31,7 @@ KEY=ваш_master_key_от_jsonbin
 Создаёт новый бин в JSONBin из локального JSON-файла и сохраняет метаданные в `bins.json`:
 
 ```bash
-go run main.go --create --file=data.json --name=my-bin
+./bin-go --create --file=data.json --name=my-bin
 ```
 
 | Флаг     | Описание                    | По умолчанию |
@@ -45,7 +45,7 @@ go run main.go --create --file=data.json --name=my-bin
 Выводит содержимое бина по ID:
 
 ```bash
-go run main.go --get --id=<bin-id>
+./bin-go --get --id=<bin-id>
 ```
 
 ### Обновить бин
@@ -53,7 +53,7 @@ go run main.go --get --id=<bin-id>
 Обновляет существующий бин данными из локального файла:
 
 ```bash
-go run main.go --update --file=data.json --id=<bin-id>
+./bin-go --update --file=data.json --id=<bin-id>
 ```
 
 ### Удалить бин
@@ -61,7 +61,7 @@ go run main.go --update --file=data.json --id=<bin-id>
 Удаляет бин на JSONBin и в локальном хранилище:
 
 ```bash
-go run main.go --delete --id=<bin-id>
+./bin-go --delete --id=<bin-id>
 ```
 
 ### Список локальных бинов
@@ -69,7 +69,7 @@ go run main.go --delete --id=<bin-id>
 Выводит содержимое локального файла `bins.json` с метаданными сохранённых бинов:
 
 ```bash
-go run main.go --list
+./bin-go --list
 ```
 
 ## Структура проекта
