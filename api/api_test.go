@@ -159,7 +159,6 @@ func TestDeleteBin(t *testing.T) {
 	myTestCase := initTestCase(*dataInit)
 
 	resp := createTestBin(t, myTestCase, client)
-	defer client.DeleteBin(resp.Metadata.ID)
 	delbin, err := client.DeleteBin(resp.Metadata.ID)
 	if err != nil {
 		t.Fatalf("GetBin: %v", err)
