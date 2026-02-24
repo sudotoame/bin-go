@@ -32,31 +32,31 @@ func NewClient(masterKey string) *Client {
 
 const baseUrl = "https://api.jsonbin.io/v3"
 
-func (c *Client) DeleteBin(id string) error {
+func (c *Client) DeleteBin(id string) (*JsonBinResponse, error) {
 	url := fmt.Sprintf("%s/b/%s", baseUrl, id)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
-		return fmt.Errorf("Ошибка создани метода DELETE: %w", err)
+		return nil, fmt.Errorf("Ошибка создани метода DELETE: %w", err)
 	}
 	req.Header.Set("X-Master-Key", c.MasterKey) // Обязательно замените на реальный ключ
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
-		return fmt.Errorf("Ошибка выполнения метода DELETE: %w", err)
+		return nil, fmt.Errorf("Ошибка выполнения метода DELETE: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("Сервер вернул ошибку: %d, тело: %s", resp.StatusCode, body)
+		return nil, fmt.Errorf("Сервер вернул ошибку: %d, тело: %s", resp.StatusCode, body)
 	}
-	// body, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return fmt.Errorf("Ошибка чтения ответа метода DELETE: %w", err)
-	// }
-	// var result JsonBinResponse
-	// if err := json.Unmarshal(body, &result); err != nil {
-	// 	return fmt.Errorf("Ошибка парсинга json: %w", err)
-	// }
-	return nil
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Ошибка чтения ответа метода DELETE: %w", err)
+	}
+	var result JsonBinResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("Ошибка парсинга json: %w", err)
+	}
+	return &result, nil
 }
 
 func (c *Client) PostBin(myData []byte, binName string, private bool) (*JsonBinResponse, error) {

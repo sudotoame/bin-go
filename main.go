@@ -155,7 +155,7 @@ func deleteBin(id string, newApi api.Client, vaultBin storage.VaultWithDB) {
 		flag.Usage()
 		os.Exit(2)
 	}
-	if err := newApi.DeleteBin(id); err != nil {
+	if _, err := newApi.DeleteBin(id); err != nil {
 		fmt.Println(err)
 		return
 	}

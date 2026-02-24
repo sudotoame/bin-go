@@ -130,3 +130,42 @@ func TestUpdateBin(t *testing.T) {
 	}
 	assertValidBinResponse(t, *updated, *updatedTc, recordUpdated)
 }
+
+func TestGetBin(t *testing.T) {
+	key := getAPIkey(t)
+	recordExpected := []string{"Polka", "Popo"}
+
+	client := api.NewClient(key)
+	dataInit := initData(recordExpected[0], recordExpected[1])
+	myTestCase := initTestCase(*dataInit)
+
+	resp := createTestBin(t, myTestCase, client)
+	defer client.DeleteBin(resp.Metadata.ID)
+	getbin, err := client.GetBin(resp.Metadata.ID)
+	if err != nil {
+		t.Fatalf("GetBin: %v", err)
+	}
+	if getbin == nil {
+		t.Fatal("Ожидается non-nil response(get bin)")
+	}
+	assertValidBinResponse(t, *getbin, *myTestCase, recordExpected)
+}
+func TestDeleteBin(t *testing.T) {
+	key := getAPIkey(t)
+	recordExpected := []string{"Polka", "Popo"}
+
+	client := api.NewClient(key)
+	dataInit := initData(recordExpected[0], recordExpected[1])
+	myTestCase := initTestCase(*dataInit)
+
+	resp := createTestBin(t, myTestCase, client)
+	defer client.DeleteBin(resp.Metadata.ID)
+	delbin, err := client.DeleteBin(resp.Metadata.ID)
+	if err != nil {
+		t.Fatalf("GetBin: %v", err)
+	}
+	if delbin == nil {
+		t.Fatal("Ожидается non-nil response(get bin)")
+	}
+	assertValidBinResponse(t, *delbin, *myTestCase, recordExpected)
+}
