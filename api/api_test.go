@@ -35,15 +35,14 @@ type MyData struct {
 	Login string
 }
 
-func initData() *MyData {
+func initData(name, login string) *MyData {
 	return &MyData{
-		Name:  "Polka",
-		Login: "Popo",
+		Name:  name,
+		Login: login,
 	}
 }
 
-func initTestCase() *TestCases {
-	data := initData()
+func initTestCase(data MyData) *TestCases {
 	myData, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
@@ -55,7 +54,8 @@ func initTestCase() *TestCases {
 	}
 }
 
-func TestPostBin(t *testing.T) {
+func getAPIkey(t *testing.T) string {
+	t.Helper()
 	key, err := Init()
 	if err != nil {
 		t.Skip(err)
@@ -63,16 +63,23 @@ func TestPostBin(t *testing.T) {
 	if key == "" {
 		t.Skip("Пропуск: Пустой API ключ")
 	}
-	client := api.NewClient(key)
-	myTestCase := initTestCase()
+	return key
+}
 
+func createTestBin(t *testing.T, myTestCase *TestCases, client *api.Client) *api.JsonBinResponse {
+	t.Helper()
 	resp, err := client.PostBin(myTestCase.Data, myTestCase.Name, myTestCase.Private)
 	if err != nil {
 		t.Fatalf("PostBin: %v", err)
 	}
 	if resp == nil {
-		t.Fatal("Ожидался non-nil response")
+		t.Fatal("Ожидался non-nil response (create bin)")
 	}
+	return resp
+}
+
+func assertValidBinResponse(t *testing.T, resp api.JsonBinResponse, myTestCase TestCases, recordExpected []string) {
+	t.Helper()
 	if resp.Metadata.ID == "" {
 		t.Error("Metadata.ID Пустая")
 	}
@@ -82,8 +89,44 @@ func TestPostBin(t *testing.T) {
 	if resp.Metadata.Private != myTestCase.Private {
 		t.Errorf("Metadata.Private должен быть: %v, является: %v", myTestCase.Private, resp.Metadata.Private)
 	}
-	if !strings.Contains(string(resp.Record), "Polka") || !strings.Contains(string(resp.Record), "Popo") {
+	if !strings.Contains(string(resp.Record), recordExpected[0]) || !strings.Contains(string(resp.Record), recordExpected[1]) {
 		t.Errorf("Record должен содержать: %v, сейчас содержит: %v", myTestCase.Data, resp.Record)
 	}
+}
+func TestPostBin(t *testing.T) {
+	key := getAPIkey(t)
+	recordExpected := []string{"Polka", "Popo"}
+
+	client := api.NewClient(key)
+	dataInit := initData(recordExpected[0], recordExpected[1])
+	myTestCase := initTestCase(*dataInit)
+
+	resp := createTestBin(t, myTestCase, client)
 	defer client.DeleteBin(resp.Metadata.ID)
+	assertValidBinResponse(t, *resp, *myTestCase, recordExpected)
+}
+
+func TestUpdateBin(t *testing.T) {
+	key := getAPIkey(t)
+	recordCreate := []string{"Polka", "Popo"}
+	recordUpdated := []string{"Molka", "Momo"}
+
+	client := api.NewClient(key)
+	dataInit := initData(recordCreate[0], recordCreate[1])
+	tc := initTestCase(*dataInit)
+
+	resp := createTestBin(t, tc, client)
+	defer client.DeleteBin(resp.Metadata.ID)
+
+	updatedData := initData(recordUpdated[0], recordUpdated[1])
+	updatedTc := initTestCase(*updatedData)
+
+	updated, err := client.UpdateBin(updatedTc.Data, resp.Metadata.ID)
+	if err != nil {
+		t.Fatalf("UpdateBin: %v", err)
+	}
+	if updated == nil {
+		t.Fatal("Ожидается non-nil response(update bin)")
+	}
+	assertValidBinResponse(t, *updated, *updatedTc, recordUpdated)
 }
