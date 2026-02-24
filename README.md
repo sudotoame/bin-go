@@ -24,6 +24,18 @@ go build -o bin-go .
 KEY=ваш_master_key_от_jsonbin
 ```
 
+## Тестирование
+
+Интеграционные тесты для проверки API-клиента (`POST`, `GET`, `UPDATE`, `DELETE`).
+
+```bash
+# Запустить все тесты
+go test api/... -v
+
+# Запустить только тесты API
+go test api/api_test -v
+```
+
 ## Использование
 
 ### Создать бин
