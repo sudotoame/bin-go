@@ -67,15 +67,13 @@ func (c *Client) PostBin(myData []byte, binName string, private bool) (*JsonBinR
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Master-Key", c.MasterKey) // Обязательно замените на реальный ключ
-	// Опционально: можно задать имя бина
+	req.Header.Set("X-Master-Key", c.MasterKey)
 	req.Header.Set("X-Bin-Name", binName)
 	if private {
 		req.Header.Set("X-Bin-Private", "true")
 	} else {
 		req.Header.Set("X-Bin-Private", "false")
 	}
-	// Если нужно поместить бин в коллекцию, укажите X-Collection-Id
 	resp, err := c.HTTP.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("Ошибка выполнения метода POST: %w", err)
